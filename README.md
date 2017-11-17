@@ -76,7 +76,7 @@ functions used:
 12. void plainfile(const char *pathname1 , const char *pathname2 , int blocks_allocated);
 13. void makedir(const char *pathname);
 14. void update_rootdir(const char *pathname , unsigned short in_number);
-
+15. void block_to_array(unsigned short *target, unsigned short block_entry_num);
 
 
 

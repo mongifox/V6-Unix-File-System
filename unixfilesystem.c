@@ -182,6 +182,30 @@ int flag=0;
 	    }
 }
 
+//function to write integer array to the required block
+void block_to_array(unsigned short *target, unsigned short block_entry_num)// writing array to block
+{
+int flag1, flag2;
+		int no_of_bytes;
+
+        if (block_entry_num > super.isize + super.fsize )
+
+		flag1 = 1	;
+	else{
+
+	lseek(fd,block_entry_num*BLOCK_SIZE,0);
+        no_of_bytes=write(fd, target, BLOCK_SIZE);
+
+	if((no_of_bytes) < BLOCK_SIZE)
+		flag2=1;
+	    }
+if (flag2 == 1)
+{
+printf("problem with block number %d",block_entry_num);
+}
+}
+
+
 // Data blocks chaining procedure
 void blocks_chains(unsigned short parse_blocks)
 {
@@ -343,11 +367,6 @@ arg2 = strtok(NULL, " ");
 
 	if(access(fs_path, X_OK) != -1)
 	{
-	 if((fd = open(fs_path,O_RDWR,0600))== -1)
-   		{
-     	printf("\n file system exists but error in opening");
-		return 1;
-    		}
 	printf("filesystem already exists. \n");
 	printf("same file system will be used\n");
 	filesys_count=1;
