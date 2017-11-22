@@ -86,7 +86,6 @@ void root_dir();
 void blk_read(unsigned short *target, unsigned short block_entry_num);
 void block_to_array(unsigned short *target, unsigned short block_entry_num);
 void copy_into_inode(filesys_inode current_inode, unsigned int new_inode);
-void freeblock(unsigned short block);
 void blocks_chains(unsigned short parse_blocks);
 unsigned short allocateinode();
 void cpin(const char *pathname1 , const char *pathname2);
@@ -205,6 +204,57 @@ printf("problem with block number %d",block_entry_num);
 }
 }
 
+//function to create root directory and its corresponding inode.
+void root_dir()
+{
+rootname = "root";
+rootfd = creat(rootname, 0600);
+rootfd = open(rootname , O_RDWR | O_APPEND);
+unsigned int i = 0;
+unsigned short no_of_bytes;
+unsigned short datablock = get_free_data_block();
+for (i=0;i<14;i++)
+	newdir.filename[i] = 0;
+
+newdir.filename[0] = '.';			//root directory's file name is .
+newdir.filename[1] = '\0';
+newdir.inode = 1;					// root directory's inode number is 1.
+
+initial_inode.flags = inode_alloc | directory | 000077;   		// flag for root directory
+initial_inode.nlinks = 2;
+initial_inode.uid = '0';
+initial_inode.gid = '0';
+initial_inode.size0 = '0';
+initial_inode.size1 = ISIZE;
+initial_inode.addr[0] = datablock;
+for (i=1;i<8;i++)
+	initial_inode.addr[i] = 0;
+
+initial_inode.actime[0] = 0;
+initial_inode.modtime[0] = 0;
+initial_inode.modtime[1] = 0;
+
+copy_into_inode(initial_inode, 0);
+lseek(rootfd , 512 , SEEK_SET);
+write(rootfd , &initial_inode , 32);
+lseek(rootfd, datablock*BLOCK_SIZE, SEEK_SET);
+
+	//filling 1st entry with .
+no_of_bytes = write(rootfd, &newdir, 16);
+//dir.inode = 0;
+if((no_of_bytes) < 16)
+	printf("\n Error in writing root directory \n ");
+
+	newdir.filename[0] = '.';
+	newdir.filename[1] = '.';
+	newdir.filename[2] = '\0';
+	// filling with .. in next entry(16 bytes) in data block.
+
+no_of_bytes = write(rootfd, &newdir, 16);
+if((no_of_bytes) < 16)
+	printf("\n Error in writing root directory\n ");
+   close(rootfd);
+}
 
 // Data blocks chaining procedure
 void blocks_chains(unsigned short parse_blocks)
@@ -274,15 +324,6 @@ no_of_bytes=write(fd,&current_inode,ISIZE);
 
 if((no_of_bytes) < ISIZE)
 	printf("\n Error in inode number : %d\n", new_inode);
-}
-
-
-
-//free data blocks and initialize free array
-void freeblock(unsigned short block)            // not used yet
-{
-super.free[super.nfree] = block;
-++super.nfree;
 }
 
 //function to get a free data block. Also decrements nfree for each pass

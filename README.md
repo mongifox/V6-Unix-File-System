@@ -77,7 +77,7 @@ functions used:
 13. void makedir(const char *pathname);
 14. void update_rootdir(const char *pathname , unsigned short in_number);
 15. void block_to_array(unsigned short *target, unsigned short block_entry_num);
-
+16. void root_dir();
 
 
 ***********************************************************************************************************************************************
